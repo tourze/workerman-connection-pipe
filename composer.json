@@ -1,0 +1,16 @@
+{
+  "name": "tourze/workerman-connection-pipe",
+  "description": "连接间转发，支持TCP和UDP",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "psr/log": "^3|^2|^1",
+    "symfony/event-dispatcher": "^6.4",
+    "workerman/workerman": "^5.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tourze\\Workerman\\ConnectionPipe\\": "src"
+    }
+  }
+}
