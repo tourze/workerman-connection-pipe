@@ -2,22 +2,21 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Model;
 
+use Tourze\Workerman\ConnectionPipe\Enum\ProtocolFamily;
+
 /**
  * 地址/端口
  */
 class Address implements \Stringable
 {
-    /**
-     * @var string 协议
-     */
-    private string $protocol;
+    private ProtocolFamily $protocol;
 
-    public function getProtocol(): string
+    public function getProtocol(): ProtocolFamily
     {
         return $this->protocol;
     }
 
-    public function setProtocol(string $protocol): void
+    public function setProtocol(ProtocolFamily $protocol): void
     {
         $this->protocol = $protocol;
     }
@@ -46,7 +45,7 @@ class Address implements \Stringable
         $this->port = $port;
     }
 
-    public static function create(string $host, int $port, string $protocol): Address
+    public static function create(string $host, int $port, ProtocolFamily $protocol): Address
     {
         $address = new self();
         $address->setHost($host);
