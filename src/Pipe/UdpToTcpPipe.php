@@ -2,7 +2,6 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Pipe;
 
-use Tourze\Workerman\ConnectionPipe\Container;
 use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
 use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
 use Workerman\Connection\ConnectionInterface;
@@ -57,7 +56,7 @@ class UdpToTcpPipe extends AbstractConnectionPipe
         }
 
         try {
-            Container::getLogger()?->debug("UDP->TCP 数据转发: {$this->getId()}", [
+            $this->logger->debug("UDP->TCP 数据转发: {$this->getId()}", [
                 'dataLength' => strlen($data),
                 'sourceAddress' => $this->source->getLocalAddress(),
                 'sourcePort' => $this->source->getLocalPort(),
@@ -69,7 +68,7 @@ class UdpToTcpPipe extends AbstractConnectionPipe
             $result = $this->target->send($data);
 
             if ($result === false) {
-                Container::getLogger()?->error("UDP->TCP 数据转发失败: {$this->getId()}", [
+                $this->logger->error("UDP->TCP 数据转发失败: {$this->getId()}", [
                     'dataLength' => strlen($data),
                     'sourceAddress' => $this->source->getLocalAddress(),
                     'sourcePort' => $this->source->getLocalPort(),
@@ -79,7 +78,7 @@ class UdpToTcpPipe extends AbstractConnectionPipe
 
                 // 分发转发失败事件
                 $failedEvent = new ForwardFailedEvent($this, $data, 'UDP', 'TCP', "发送失败");
-                Container::getEventDispatcher()?->dispatch($failedEvent);
+                $this->eventDispatcher->dispatch($failedEvent);
 
                 return false;
             }
@@ -90,11 +89,11 @@ class UdpToTcpPipe extends AbstractConnectionPipe
                 'sourcePort' => $this->source->getLocalPort(),
                 'targetAddress' => $this->target->getRemoteAddress(),
             ]);
-            Container::getEventDispatcher()?->dispatch($forwardedEvent);
+            $this->eventDispatcher->dispatch($forwardedEvent);
 
             return true;
         } catch (\Throwable $e) {
-            Container::getLogger()?->error("UDP->TCP 数据转发异常: {$this->getId()}", [
+            $this->logger->error("UDP->TCP 数据转发异常: {$this->getId()}", [
                 'exception' => $e->getMessage(),
                 'sourceAddress' => $this->source->getLocalAddress(),
                 'sourcePort' => $this->source->getLocalPort(),
@@ -104,7 +103,7 @@ class UdpToTcpPipe extends AbstractConnectionPipe
 
             // 分发转发失败事件
             $failedEvent = new ForwardFailedEvent($this, $data, 'UDP', 'TCP', $e->getMessage());
-            Container::getEventDispatcher()?->dispatch($failedEvent);
+            $this->eventDispatcher->dispatch($failedEvent);
 
             return false;
         }

@@ -2,6 +2,10 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Pipe;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Container;
 use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
 use Workerman\Connection\ConnectionInterface;
@@ -41,13 +45,23 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
         'target' => ''
     ];
 
+    protected EventDispatcherInterface $eventDispatcher;
+
+    protected LoggerInterface $logger;
+
     /**
      * 构造函数
      */
-    public function __construct()
+    public function __construct(
+        ?EventDispatcherInterface $eventDispatcher = null,
+        ?LoggerInterface $logger = null,
+    )
     {
         // 生成唯一ID
         $this->id = uniqid('pipe_', true);
+
+        $this->eventDispatcher = $eventDispatcher ?? Container::getEventDispatcher() ?? new EventDispatcher();
+        $this->logger = $logger ?? Container::getLogger() ?? new NullLogger();
     }
 
     public function getSource(): ConnectionInterface
@@ -87,7 +101,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
         $this->isActive = true;
 
-        Container::getLogger()?->info("连接管道已启动: {$this->getId()}", [
+        $this->logger->info("连接管道已启动: {$this->getId()}", [
             'protocols' => $this->getProtocols(),
         ]);
 
@@ -102,7 +116,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
         $this->isActive = false;
 
-        Container::getLogger()?->info("连接管道已停止: {$this->getId()}", [
+        $this->logger->info("连接管道已停止: {$this->getId()}", [
             'protocols' => $this->getProtocols(),
         ]);
 

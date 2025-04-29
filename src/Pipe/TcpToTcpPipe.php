@@ -2,7 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Pipe;
 
-use Tourze\Workerman\ConnectionPipe\Container;
+use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
 use Workerman\Connection\ConnectionInterface;
 use Workerman\Connection\TcpConnection;
 
@@ -64,7 +64,7 @@ class TcpToTcpPipe extends AbstractConnectionPipe
 
         try {
             // 记录转发信息
-            Container::getLogger()?->debug("TCP->TCP 数据转发: {$this->getId()}", [
+            $this->logger->debug("TCP->TCP 数据转发: {$this->getId()}", [
                 'dataLength' => strlen($data),
                 'sourceId' => $this->source->id,
                 'targetId' => $this->target->id,
@@ -75,7 +75,7 @@ class TcpToTcpPipe extends AbstractConnectionPipe
 
             // 检查发送结果
             if ($result === false) {
-                Container::getLogger()?->error("TCP->TCP 数据转发失败: {$this->getId()}", [
+                $this->logger->error("TCP->TCP 数据转发失败: {$this->getId()}", [
                     'dataLength' => strlen($data),
                     'sourceId' => $this->source->id,
                     'targetId' => $this->target->id,
@@ -83,9 +83,17 @@ class TcpToTcpPipe extends AbstractConnectionPipe
                 return false;
             }
 
+            // 分发转发成功事件
+            $forwardedEvent = new DataForwardedEvent($this, $data, 'TCP', 'TCP', [
+                'sourceAddress' => $this->source->getLocalAddress(),
+                'sourcePort' => $this->source->getLocalPort(),
+                'targetAddress' => $this->target->getRemoteAddress(),
+            ]);
+            $this->eventDispatcher->dispatch($forwardedEvent);
+
             return true;
         } catch (\Throwable $e) {
-            Container::getLogger()?->error("TCP->TCP 数据转发异常: {$this->getId()}", [
+            $this->logger->error("TCP->TCP 数据转发异常: {$this->getId()}", [
                 'exception' => $e->getMessage(),
                 'sourceId' => $this->source->id,
                 'targetId' => $this->target->id,
