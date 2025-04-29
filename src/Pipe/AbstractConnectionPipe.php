@@ -8,6 +8,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Container;
 use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
+use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
 use Workerman\Connection\ConnectionInterface;
 use Workerman\Connection\TcpConnection;
 
@@ -136,6 +137,18 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     public function getId(): string
     {
         return $this->id;
+    }
+
+    protected ?MessageWatcherInterface $messageWatcher = null;
+
+    public function setMessageWatcher(?MessageWatcherInterface $messageWatcher): void
+    {
+        $this->messageWatcher = $messageWatcher;
+    }
+
+    public function unsetMessageWatcher(): void
+    {
+        $this->messageWatcher = null;
     }
 
     /**

@@ -38,8 +38,20 @@ class UdpToUdpPipe extends AbstractConnectionPipe
     {
         // 在UDP源连接上设置onMessage回调
         $this->source->onMessage = function ($connection, $data, $sourceAddress, $sourcePort) {
-            // 执行转发
-            $this->forward($data, $sourceAddress, $sourcePort);
+            if (empty($this->messageWatcher)) {
+                $this->forward($data, $sourceAddress, $sourcePort);
+                return;
+            }
+            $this->messageWatcher->__invoke(
+                $data,
+                $this->source,
+                $this->target,
+                function (bool $result) use ($data, $sourceAddress, $sourcePort) {
+                    if ($result) {
+                        $this->forward($data, $sourceAddress, $sourcePort);
+                    }
+                },
+            );
         };
 
         // 在源连接上设置onClose回调，关闭目标连接

@@ -37,7 +37,20 @@ class TcpToTcpPipe extends AbstractConnectionPipe
     {
         // 在源连接上设置onMessage回调，将数据转发到目标连接
         $this->source->onMessage = function (ConnectionInterface $conn, $data) {
-            $this->forward($data);
+            if (empty($this->messageWatcher)) {
+                $this->forward($data);
+                return;
+            }
+            $this->messageWatcher->__invoke(
+                $data,
+                $this->source,
+                $this->target,
+                function (bool $result) use ($data) {
+                    if ($result) {
+                        $this->forward($data);
+                    }
+                },
+            );
         };
 
         // 在源连接上设置onClose回调，关闭目标连接
