@@ -7,7 +7,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Pipe\AbstractConnectionPipe;
 use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
-use Workerman\Connection\ConnectionInterface;
+use Workerman\Connection\TcpConnection;
+use Workerman\Connection\UdpConnection;
 
 class AbstractConnectionPipeTest extends TestCase
 {
@@ -22,13 +23,24 @@ class AbstractConnectionPipeTest extends TestCase
         return new class($eventDispatcher, $logger) extends AbstractConnectionPipe {
             protected function setupPipeCallbacks(): void
             {
-                // 测试实现，不做任何操作
+                // 测试实现，使用基类的默认实现
+                parent::setupPipeCallbacks();
             }
 
             public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool
             {
                 // 测试实现，始终返回成功
                 return true;
+            }
+
+            protected function getExpectedSourceType(): string
+            {
+                return 'tcp';
+            }
+
+            protected function getExpectedTargetType(): string
+            {
+                return 'tcp';
             }
         };
     }
@@ -53,11 +65,11 @@ class AbstractConnectionPipeTest extends TestCase
     {
         $pipe = $this->createConcreteConnectionPipe();
 
-        // 创建模拟连接
-        /** @var ConnectionInterface $sourceConnection */
-        $sourceConnection = $this->createMock(ConnectionInterface::class);
-        /** @var ConnectionInterface $targetConnection */
-        $targetConnection = $this->createMock(ConnectionInterface::class);
+        // 创建模拟 TCP 连接
+        /** @var TcpConnection $sourceConnection */
+        $sourceConnection = $this->createMock(TcpConnection::class);
+        /** @var TcpConnection $targetConnection */
+        $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接
         $pipe->setSource($sourceConnection);
@@ -66,6 +78,42 @@ class AbstractConnectionPipeTest extends TestCase
         // 验证获取的连接
         $this->assertSame($sourceConnection, $pipe->getSource());
         $this->assertSame($targetConnection, $pipe->getTarget());
+    }
+
+    /**
+     * 测试连接类型验证 - 错误的源连接类型
+     */
+    public function testSetSourceWithWrongType(): void
+    {
+        $pipe = $this->createConcreteConnectionPipe();
+
+        // 创建 UDP 连接（期望是 TCP）
+        /** @var UdpConnection $udpConnection */
+        $udpConnection = $this->createMock(UdpConnection::class);
+
+        // 期望抛出异常
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Source connection must be an instance of Workerman\Connection\TcpConnection');
+
+        $pipe->setSource($udpConnection);
+    }
+
+    /**
+     * 测试连接类型验证 - 错误的目标连接类型
+     */
+    public function testSetTargetWithWrongType(): void
+    {
+        $pipe = $this->createConcreteConnectionPipe();
+
+        // 创建 UDP 连接（期望是 TCP）
+        /** @var UdpConnection $udpConnection */
+        $udpConnection = $this->createMock(UdpConnection::class);
+
+        // 期望抛出异常
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Target connection must be an instance of Workerman\Connection\TcpConnection');
+
+        $pipe->setTarget($udpConnection);
     }
 
     /**
@@ -79,10 +127,10 @@ class AbstractConnectionPipeTest extends TestCase
         $this->assertFalse($pipe->isActive());
 
         // 设置源和目标连接
-        /** @var ConnectionInterface $sourceConnection */
-        $sourceConnection = $this->createMock(ConnectionInterface::class);
-        /** @var ConnectionInterface $targetConnection */
-        $targetConnection = $this->createMock(ConnectionInterface::class);
+        /** @var TcpConnection $sourceConnection */
+        $sourceConnection = $this->createMock(TcpConnection::class);
+        /** @var TcpConnection $targetConnection */
+        $targetConnection = $this->createMock(TcpConnection::class);
         $pipe->setSource($sourceConnection);
         $pipe->setTarget($targetConnection);
 

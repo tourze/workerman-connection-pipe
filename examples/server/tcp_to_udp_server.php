@@ -13,7 +13,7 @@ use Workerman\Worker;
 // 设置日志处理器
 $logger = new \Monolog\Logger('tcp_to_udp');
 $logger->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', \Monolog\Logger::DEBUG));
-Container::setLogger($logger);
+Container::getInstance()->setLogger($logger);
 
 // 设置事件分发器
 $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
@@ -27,7 +27,7 @@ $eventDispatcher->addListener(ForwardFailedEvent::class, function (ForwardFailed
     echo "数据转发失败: {$event->getSourceProtocol()}->{$event->getTargetProtocol()} " .
         "原因: {$event->getReason()}" . PHP_EOL;
 });
-Container::setEventDispatcher($eventDispatcher);
+Container::getInstance()->setEventDispatcher($eventDispatcher);
 
 // 创建TCP服务器
 $tcpServer = new Worker('tcp://0.0.0.0:8000');

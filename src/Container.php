@@ -8,27 +8,37 @@ use Workerman\Connection\ConnectionInterface;
 
 class Container
 {
-    public static ?LoggerInterface $logger = null;
+    private static ?self $instance = null;
+    private ?LoggerInterface $logger = null;
+    private ?EventDispatcherInterface $eventDispatcher = null;
 
-    public static ?EventDispatcherInterface $eventDispatcher = null;
+    private function __construct() {}
 
-    public static function getLogger(?ConnectionInterface $connection = null): ?LoggerInterface
+    public static function getInstance(): self
     {
-        return static::$logger;
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
-    public static function getEventDispatcher(?ConnectionInterface $connection = null): ?EventDispatcherInterface
+    public function getLogger(?ConnectionInterface $connection = null): ?LoggerInterface
     {
-        return static::$eventDispatcher;
+        return $this->logger;
     }
 
-    public static function setLogger(?LoggerInterface $logger): void
+    public function getEventDispatcher(?ConnectionInterface $connection = null): ?EventDispatcherInterface
     {
-        self::$logger = $logger;
+        return $this->eventDispatcher;
     }
 
-    public static function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): void
+    public function setLogger(?LoggerInterface $logger): void
     {
-        self::$eventDispatcher = $eventDispatcher;
+        $this->logger = $logger;
+    }
+
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): void
+    {
+        $this->eventDispatcher = $eventDispatcher;
     }
 }

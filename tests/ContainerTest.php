@@ -11,8 +11,8 @@ class ContainerTest extends TestCase
 {
     protected function tearDown(): void
     {
-        Container::setLogger(null);
-        Container::setEventDispatcher(null);
+        Container::getInstance()->setLogger(null);
+        Container::getInstance()->setEventDispatcher(null);
     }
 
     public function testSetGetLogger(): void
@@ -22,10 +22,10 @@ class ContainerTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
 
         // 设置Logger
-        Container::setLogger($logger);
+        Container::getInstance()->setLogger($logger);
 
         // 验证获取到的Logger是同一个实例
-        $this->assertSame($logger, Container::getLogger());
+        $this->assertSame($logger, Container::getInstance()->getLogger());
     }
 
     public function testSetGetEventDispatcher(): void
@@ -35,19 +35,19 @@ class ContainerTest extends TestCase
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         // 设置EventDispatcher
-        Container::setEventDispatcher($eventDispatcher);
+        Container::getInstance()->setEventDispatcher($eventDispatcher);
 
         // 验证获取到的EventDispatcher是同一个实例
-        $this->assertSame($eventDispatcher, Container::getEventDispatcher());
+        $this->assertSame($eventDispatcher, Container::getInstance()->getEventDispatcher());
     }
 
     public function testDefaultValues(): void
     {
         // 确保默认值为null
-        Container::setLogger(null);
-        Container::setEventDispatcher(null);
+        Container::getInstance()->setLogger(null);
+        Container::getInstance()->setEventDispatcher(null);
 
-        $this->assertNull(Container::getLogger());
-        $this->assertNull(Container::getEventDispatcher());
+        $this->assertNull(Container::getInstance()->getLogger());
+        $this->assertNull(Container::getInstance()->getEventDispatcher());
     }
 }

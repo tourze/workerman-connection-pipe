@@ -2,9 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Pipe;
 
-use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
-use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
-use Workerman\Connection\ConnectionInterface;
+use Tourze\Workerman\ConnectionPipe\DTO\ForwardContext;
 use Workerman\Connection\UdpConnection;
 
 /**
@@ -16,111 +14,33 @@ use Workerman\Connection\UdpConnection;
  */
 class UdpToUdpPipe extends AbstractConnectionPipe
 {
-    public function setSource(ConnectionInterface $connection): void
+    /**
+     * 获取期望的源连接类型
+     */
+    protected function getExpectedSourceType(): string
     {
-        if (!($connection instanceof UdpConnection)) {
-            throw new \InvalidArgumentException("源连接必须是 UdpConnection 类型");
-        }
-
-        parent::setSource($connection);
+        return 'udp';
     }
 
-    public function setTarget(ConnectionInterface $connection): void
+    /**
+     * 获取期望的目标连接类型
+     */
+    protected function getExpectedTargetType(): string
     {
-        if (!($connection instanceof UdpConnection)) {
-            throw new \InvalidArgumentException("目标连接必须是 UdpConnection 类型");
-        }
-
-        parent::setTarget($connection);
-    }
-
-    protected function setupPipeCallbacks(): void
-    {
-        // 在UDP源连接上设置onMessage回调
-        $this->source->onMessage = function ($connection, $data, $sourceAddress, $sourcePort) {
-            if (empty($this->messageWatcher)) {
-                $this->forward($data, $sourceAddress, $sourcePort);
-                return;
-            }
-            $this->messageWatcher->__invoke(
-                $data,
-                $this->source,
-                $this->target,
-                function (bool $result) use ($data, $sourceAddress, $sourcePort) {
-                    if ($result) {
-                        $this->forward($data, $sourceAddress, $sourcePort);
-                    }
-                },
-            );
-        };
-
-        // 在源连接上设置onClose回调，关闭目标连接
-        $this->source->onClose = function () {
-            $this->target->close();
-        };
+        return 'udp';
     }
 
     public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool
     {
-        if (!$this->isActive || !$this->target || !$this->source) {
-            return false;
-        }
+        $context = new ForwardContext(
+            sourceAddress: $sourceAddress,
+            sourcePort: $sourcePort,
+            sourceLocalAddress: $this->source->getLocalAddress(),
+            targetLocalAddress: $this->target->getLocalAddress(),
+            targetAddress: $this->target->getRemoteAddress(),
+            targetPort: $this->target->getRemotePort(),
+        );
 
-        try {
-            $this->logger->debug("UDP->UDP 数据转发: {$this->getId()}", [
-                'dataLength' => strlen($data),
-                'sourceAddress' => $sourceAddress,
-                'sourcePort' => $sourcePort,
-                'sourceLocalAddress' => $this->source->getLocalAddress(),
-                'targetLocalAddress' => $this->target->getLocalAddress(),
-                'targetAddress' => $this->target->getRemoteAddress(),
-                'targetPort' => $this->target->getRemotePort(),
-            ]);
-
-            $result = $this->target->send($data);
-
-            if ($result === false) {
-                $this->logger->error("UDP->UDP 数据转发失败: {$this->getId()}", [
-                    'dataLength' => strlen($data),
-                    'sourceAddress' => $sourceAddress,
-                    'sourcePort' => $sourcePort,
-                    'sourceLocalAddress' => $this->source->getLocalAddress(),
-                    'targetLocalAddress' => $this->target->getLocalAddress(),
-                    'targetAddress' => $this->target->getRemoteAddress(),
-                    'targetPort' => $this->target->getRemotePort(),
-                ]);
-
-                // 分发转发失败事件
-                $failedEvent = new ForwardFailedEvent($this, $data, 'UDP', 'UDP', "发送失败");
-                $this->eventDispatcher->dispatch($failedEvent);
-
-                return false;
-            }
-
-            // 分发转发成功事件
-            $forwardedEvent = new DataForwardedEvent($this, $data, 'UDP', 'UDP', [
-                'sourceAddress' => $sourceAddress,
-                'sourcePort' => $sourcePort,
-                'targetAddress' => $this->target->getRemoteAddress(),
-                'targetPort' => $this->target->getRemotePort(),
-            ]);
-            $this->eventDispatcher->dispatch($forwardedEvent);
-
-            return true;
-        } catch (\Throwable $e) {
-            $this->logger->error("UDP->UDP 数据转发异常: {$this->getId()}", [
-                'exception' => $e->getMessage(),
-                'sourceAddress' => $sourceAddress,
-                'sourcePort' => $sourcePort,
-                'sourceLocalAddress' => $this->source->getLocalAddress(),
-                'targetLocalAddress' => $this->target->getLocalAddress(),
-            ]);
-
-            // 分发转发失败事件
-            $failedEvent = new ForwardFailedEvent($this, $data, 'UDP', 'UDP', $e->getMessage());
-            $this->eventDispatcher->dispatch($failedEvent);
-
-            return false;
-        }
+        return $this->doForward($data, $context);
     }
 }

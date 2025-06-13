@@ -55,7 +55,7 @@ class TcpToTcpPipeTest extends TestCase
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("源连接必须是 TcpConnection 类型");
+        $this->expectExceptionMessage('Source connection must be an instance of Workerman\Connection\TcpConnection');
 
         // 尝试设置非TCP连接
         $this->pipe->setSource($nonTcpConnection);
@@ -88,7 +88,7 @@ class TcpToTcpPipeTest extends TestCase
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("目标连接必须是 TcpConnection 类型");
+        $this->expectExceptionMessage('Target connection must be an instance of Workerman\Connection\TcpConnection');
 
         // 尝试设置非TCP连接
         $this->pipe->setTarget($nonTcpConnection);
@@ -133,6 +133,11 @@ class TcpToTcpPipeTest extends TestCase
 
         // 设置目标连接的send方法直接返回true
         $targetConnection->method('send')->willReturn(true);
+        
+        // 设置连接的地址方法
+        $sourceConnection->method('getLocalAddress')->willReturn('127.0.0.1:8001');
+        $sourceConnection->method('getLocalPort')->willReturn(8001);
+        $targetConnection->method('getRemoteAddress')->willReturn('127.0.0.1:8002');
 
         // 创建事件分发器
         /** @var EventDispatcherInterface&MockObject $eventDispatcher */

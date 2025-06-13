@@ -14,7 +14,7 @@ use Workerman\Worker;
 // 创建日志处理器
 $logger = new \Monolog\Logger('udp_to_tcp');
 $logger->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', \Monolog\Logger::DEBUG));
-Container::setLogger($logger);
+Container::getInstance()->setLogger($logger);
 
 // 创建事件分发器
 $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
@@ -28,7 +28,7 @@ $eventDispatcher->addListener(ForwardFailedEvent::class, function (ForwardFailed
     echo "数据转发失败: {$event->getSourceProtocol()}->{$event->getTargetProtocol()} " .
         "原因: {$event->getReason()}" . PHP_EOL;
 });
-Container::setEventDispatcher($eventDispatcher);
+Container::getInstance()->setEventDispatcher($eventDispatcher);
 
 // 创建UDP服务器
 $udpServer = new Worker('udp://0.0.0.0:8000');
