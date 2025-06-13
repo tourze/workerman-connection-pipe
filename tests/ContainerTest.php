@@ -1,6 +1,6 @@
 <?php
 
-namespace Tourze\Workerman\ConnectionPipe\Tests\Unit;
+namespace Tourze\Workerman\ConnectionPipe\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

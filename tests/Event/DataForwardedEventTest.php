@@ -1,6 +1,6 @@
 <?php
 
-namespace Tourze\Workerman\ConnectionPipe\Tests\Unit\Event;
+namespace Tourze\Workerman\ConnectionPipe\Tests\Event;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

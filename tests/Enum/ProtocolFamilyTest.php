@@ -1,6 +1,6 @@
 <?php
 
-namespace Tourze\Workerman\ConnectionPipe\Tests\Unit\Enum;
+namespace Tourze\Workerman\ConnectionPipe\Tests\Enum;
 
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\ConnectionPipe\Enum\ProtocolFamily;
