@@ -5,7 +5,7 @@ namespace Tourze\Workerman\ConnectionPipe\Pipe;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Container;
 use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
 use Tourze\Workerman\ConnectionPipe\DTO\ForwardContext;
@@ -185,14 +185,14 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
     /**
      * 获取期望的源连接类型
-     * 
+     *
      * @return string 'tcp' 或 'udp'
      */
     abstract protected function getExpectedSourceType(): string;
 
     /**
      * 获取期望的目标连接类型
-     * 
+     *
      * @return string 'tcp' 或 'udp'
      */
     abstract protected function getExpectedTargetType(): string;
@@ -285,12 +285,16 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
         // 在目标连接上设置onBufferFull回调，暂停源连接接收数据
         $target->onBufferFull = function () {
-            $this->source->pauseRecv();
+            if ($this->source instanceof TcpConnection) {
+                $this->source->pauseRecv();
+            }
         };
 
         // 在目标连接上设置onBufferDrain回调，恢复源连接接收数据
         $target->onBufferDrain = function () {
-            $this->source->resumeRecv();
+            if ($this->source instanceof TcpConnection) {
+                $this->source->resumeRecv();
+            }
         };
     }
 

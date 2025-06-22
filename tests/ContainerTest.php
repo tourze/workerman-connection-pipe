@@ -2,6 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -18,7 +19,7 @@ class ContainerTest extends TestCase
     public function testSetGetLogger(): void
     {
         // 创建一个模拟的Logger对象
-        /** @var LoggerInterface $logger */
+        /** @var LoggerInterface&MockObject $logger */
         $logger = $this->createMock(LoggerInterface::class);
 
         // 设置Logger
@@ -31,7 +32,7 @@ class ContainerTest extends TestCase
     public function testSetGetEventDispatcher(): void
     {
         // 创建一个模拟的EventDispatcher对象
-        /** @var EventDispatcherInterface $eventDispatcher */
+        /** @var EventDispatcherInterface&MockObject $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
 
         // 设置EventDispatcher

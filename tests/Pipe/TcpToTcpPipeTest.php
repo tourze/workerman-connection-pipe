@@ -5,7 +5,7 @@ namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToTcpPipe;
 use Workerman\Connection\ConnectionInterface;
 use Workerman\Connection\TcpConnection;
@@ -19,9 +19,7 @@ class TcpToTcpPipeTest extends TestCase
         parent::setUp();
 
         // 创建事件分发器和日志记录器模拟对象
-        /** @var EventDispatcherInterface $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        /** @var LoggerInterface $logger */
         $logger = $this->createMock(LoggerInterface::class);
 
         // 创建管道实例
@@ -34,7 +32,6 @@ class TcpToTcpPipeTest extends TestCase
     public function testSetSourceTypeCheck(): void
     {
         // 模拟一个TCP连接
-        /** @var TcpConnection $tcpConnection */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置源连接（应该不会抛出异常）
@@ -67,7 +64,6 @@ class TcpToTcpPipeTest extends TestCase
     public function testSetTargetTypeCheck(): void
     {
         // 模拟一个TCP连接
-        /** @var TcpConnection $tcpConnection */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置目标连接（应该不会抛出异常）
@@ -100,9 +96,7 @@ class TcpToTcpPipeTest extends TestCase
     public function testSetupPipeCallbacks(): void
     {
         // 创建源和目标TCP连接
-        /** @var TcpConnection $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接
@@ -125,11 +119,9 @@ class TcpToTcpPipeTest extends TestCase
         // 创建源和目标TCP连接
         /** @var TcpConnection&MockObject $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        $sourceConnection->id = 1;
 
         /** @var TcpConnection&MockObject $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
-        $targetConnection->id = 2;
 
         // 设置目标连接的send方法直接返回true
         $targetConnection->method('send')->willReturn(true);
@@ -166,9 +158,7 @@ class TcpToTcpPipeTest extends TestCase
     public function testForwardInactive(): void
     {
         // 创建源和目标TCP连接
-        /** @var TcpConnection $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接但不激活管道

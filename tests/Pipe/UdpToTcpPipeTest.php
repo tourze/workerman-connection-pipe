@@ -5,7 +5,7 @@ namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Pipe\UdpToTcpPipe;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
@@ -20,7 +20,6 @@ class UdpToTcpPipeTest extends TestCase
     public function testSetSourceTypeCheck(): void
     {
         // 模拟一个UDP连接
-        /** @var UdpConnection $udpConnection */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 设置源连接（应该不会抛出异常）
@@ -53,7 +52,6 @@ class UdpToTcpPipeTest extends TestCase
     public function testSetTargetTypeCheck(): void
     {
         // 模拟一个TCP连接
-        /** @var TcpConnection $tcpConnection */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置目标连接（应该不会抛出异常）
@@ -127,9 +125,7 @@ class UdpToTcpPipeTest extends TestCase
     public function testForwardInactive(): void
     {
         // 创建源和目标连接
-        /** @var UdpConnection $sourceConnection */
         $sourceConnection = $this->createMock(UdpConnection::class);
-        /** @var TcpConnection $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接但不激活管道
@@ -148,9 +144,7 @@ class UdpToTcpPipeTest extends TestCase
         parent::setUp();
 
         // 创建事件分发器和日志记录器模拟对象
-        /** @var EventDispatcherInterface $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        /** @var LoggerInterface $logger */
         $logger = $this->createMock(LoggerInterface::class);
 
         // 创建管道实例

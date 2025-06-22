@@ -8,6 +8,7 @@
     "psr/log": "^3|^2|^1",
     "symfony/event-dispatcher": "^6.4",
     "symfony/event-dispatcher-contracts": "^2.5 | ^3",
+    "tourze/enum-extra": "0.1.*",
     "workerman/workerman": "^5.1"
   },
   "require-dev": {

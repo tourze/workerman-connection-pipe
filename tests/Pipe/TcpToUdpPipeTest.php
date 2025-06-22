@@ -5,7 +5,7 @@ namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToUdpPipe;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
@@ -20,7 +20,6 @@ class TcpToUdpPipeTest extends TestCase
     public function testSetSourceTypeCheck(): void
     {
         // 模拟一个TCP连接
-        /** @var TcpConnection $tcpConnection */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置源连接（应该不会抛出异常）
@@ -53,7 +52,6 @@ class TcpToUdpPipeTest extends TestCase
     public function testSetTargetTypeCheck(): void
     {
         // 模拟一个UDP连接
-        /** @var UdpConnection $udpConnection */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 设置目标连接（应该不会抛出异常）
@@ -88,7 +86,6 @@ class TcpToUdpPipeTest extends TestCase
         // 创建源TCP连接和目标UDP连接
         /** @var TcpConnection&MockObject $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        $sourceConnection->id = 1;
 
         /** @var UdpConnection&MockObject $targetConnection */
         $targetConnection = $this->createMock(UdpConnection::class);
@@ -126,9 +123,7 @@ class TcpToUdpPipeTest extends TestCase
     public function testForwardInactive(): void
     {
         // 创建源和目标连接
-        /** @var TcpConnection $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        /** @var UdpConnection $targetConnection */
         $targetConnection = $this->createMock(UdpConnection::class);
 
         // 设置连接但不激活管道
@@ -147,9 +142,7 @@ class TcpToUdpPipeTest extends TestCase
         parent::setUp();
 
         // 创建事件分发器和日志记录器模拟对象
-        /** @var EventDispatcherInterface $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        /** @var LoggerInterface $logger */
         $logger = $this->createMock(LoggerInterface::class);
 
         // 创建管道实例

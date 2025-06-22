@@ -2,6 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToTcpPipe;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToUdpPipe;
@@ -19,9 +20,9 @@ class PipeFactoryTest extends TestCase
     public function testCreateTcpToTcp(): void
     {
         // 模拟TCP连接
-        /** @var TcpConnection $source */
+        /** @var TcpConnection&MockObject $source */
         $source = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection $target */
+        /** @var TcpConnection&MockObject $target */
         $target = $this->createMock(TcpConnection::class);
 
         // 创建管道
@@ -39,9 +40,9 @@ class PipeFactoryTest extends TestCase
     public function testCreateTcpToUdp(): void
     {
         // 模拟连接
-        /** @var TcpConnection $source */
+        /** @var TcpConnection&MockObject $source */
         $source = $this->createMock(TcpConnection::class);
-        /** @var UdpConnection $target */
+        /** @var UdpConnection&MockObject $target */
         $target = $this->createMock(UdpConnection::class);
 
         // 创建管道
@@ -59,9 +60,9 @@ class PipeFactoryTest extends TestCase
     public function testCreateUdpToTcp(): void
     {
         // 模拟连接
-        /** @var UdpConnection $source */
+        /** @var UdpConnection&MockObject $source */
         $source = $this->createMock(UdpConnection::class);
-        /** @var TcpConnection $target */
+        /** @var TcpConnection&MockObject $target */
         $target = $this->createMock(TcpConnection::class);
 
         // 创建管道
@@ -79,9 +80,9 @@ class PipeFactoryTest extends TestCase
     public function testCreateUdpToUdp(): void
     {
         // 模拟连接
-        /** @var UdpConnection $source */
+        /** @var UdpConnection&MockObject $source */
         $source = $this->createMock(UdpConnection::class);
-        /** @var UdpConnection $target */
+        /** @var UdpConnection&MockObject $target */
         $target = $this->createMock(UdpConnection::class);
 
         // 创建管道

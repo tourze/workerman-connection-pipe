@@ -4,7 +4,7 @@ namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Pipe\AbstractConnectionPipe;
 use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
 use Workerman\Connection\TcpConnection;
@@ -53,9 +53,9 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 测试ID是否为非空字符串
-        $this->assertIsString($pipe->getId());
-        $this->assertNotEmpty($pipe->getId());
-        $this->assertStringStartsWith('pipe_', $pipe->getId());
+        $id = $pipe->getId();
+        $this->assertNotEmpty($id);
+        $this->assertStringStartsWith('pipe_', $id);
     }
 
     /**
@@ -66,9 +66,7 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建模拟 TCP 连接
-        /** @var TcpConnection $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接
@@ -88,7 +86,6 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建 UDP 连接（期望是 TCP）
-        /** @var UdpConnection $udpConnection */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 期望抛出异常
@@ -106,7 +103,6 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建 UDP 连接（期望是 TCP）
-        /** @var UdpConnection $udpConnection */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 期望抛出异常
@@ -127,9 +123,7 @@ class AbstractConnectionPipeTest extends TestCase
         $this->assertFalse($pipe->isActive());
 
         // 设置源和目标连接
-        /** @var TcpConnection $sourceConnection */
         $sourceConnection = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection $targetConnection */
         $targetConnection = $this->createMock(TcpConnection::class);
         $pipe->setSource($sourceConnection);
         $pipe->setTarget($targetConnection);
@@ -151,7 +145,6 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建消息观察器
-        /** @var MessageWatcherInterface $watcher */
         $watcher = $this->createMock(MessageWatcherInterface::class);
 
         // 设置观察器
@@ -174,7 +167,6 @@ class AbstractConnectionPipeTest extends TestCase
 
         // 验证默认协议信息
         $protocols = $pipe->getProtocols();
-        $this->assertIsArray($protocols);
         $this->assertArrayHasKey('source', $protocols);
         $this->assertArrayHasKey('target', $protocols);
     }
