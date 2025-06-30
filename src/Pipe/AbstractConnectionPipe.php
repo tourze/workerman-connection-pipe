@@ -13,6 +13,7 @@ use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
 use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
 use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
 use Workerman\Connection\ConnectionInterface;
+use Tourze\Workerman\ConnectionPipe\Exception\InvalidConnectionTypeException;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
 
@@ -203,7 +204,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
      * @param ConnectionInterface $connection
      * @param string $expectedType
      * @param string $connectionName
-     * @throws \InvalidArgumentException
+     * @throws InvalidConnectionTypeException
      */
     protected function validateConnectionType(ConnectionInterface $connection, string $expectedType, string $connectionName): void
     {
@@ -211,9 +212,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
         if ($actualType !== $expectedType) {
             $expectedClass = $expectedType === 'tcp' ? TcpConnection::class : UdpConnection::class;
-            throw new \InvalidArgumentException(
-                sprintf('%s connection must be an instance of %s', $connectionName, $expectedClass)
-            );
+            throw InvalidConnectionTypeException::create($connectionName, $expectedClass);
         }
     }
 

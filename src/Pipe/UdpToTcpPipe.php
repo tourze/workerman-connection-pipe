@@ -34,8 +34,8 @@ class UdpToTcpPipe extends AbstractConnectionPipe
     public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool
     {
         $context = new ForwardContext(
-            sourceAddress: $sourceAddress ?: $this->source->getLocalAddress(),
-            sourcePort: $sourcePort ?: $this->source->getLocalPort(),
+            sourceAddress: $sourceAddress !== '' ? $sourceAddress : $this->source->getLocalAddress(),
+            sourcePort: $sourcePort !== 0 ? $sourcePort : $this->source->getLocalPort(),
             sourceLocalAddress: $this->source->getLocalAddress(),
             targetAddress: $this->target->getRemoteAddress(),
         );
