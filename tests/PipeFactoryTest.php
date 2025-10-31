@@ -2,7 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests;
 
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToTcpPipe;
 use Tourze\Workerman\ConnectionPipe\Pipe\TcpToUdpPipe;
@@ -12,18 +12,29 @@ use Tourze\Workerman\ConnectionPipe\PipeFactory;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
 
-class PipeFactoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(PipeFactory::class)]
+final class PipeFactoryTest extends TestCase
 {
     /**
      * 测试创建TCP到TCP的管道
      */
     public function testCreateTcpToTcp(): void
     {
-        // 模拟TCP连接
-        /** @var TcpConnection&MockObject $source */
+        // 必须使用具体类 TcpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $source = $this->createMock(TcpConnection::class);
-        /** @var TcpConnection&MockObject $target */
+        self::assertInstanceOf(TcpConnection::class, $source);
+        // 必须使用具体类 TcpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $target = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $target);
 
         // 创建管道
         $pipe = PipeFactory::createTcpToTcp($source, $target);
@@ -39,11 +50,18 @@ class PipeFactoryTest extends TestCase
      */
     public function testCreateTcpToUdp(): void
     {
-        // 模拟连接
-        /** @var TcpConnection&MockObject $source */
+        // 必须使用具体类 TcpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $source = $this->createMock(TcpConnection::class);
-        /** @var UdpConnection&MockObject $target */
+        self::assertInstanceOf(TcpConnection::class, $source);
+        // 必须使用具体类 UdpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $target = $this->createMock(UdpConnection::class);
+        self::assertInstanceOf(UdpConnection::class, $target);
 
         // 创建管道
         $pipe = PipeFactory::createTcpToUdp($source, $target);
@@ -59,11 +77,18 @@ class PipeFactoryTest extends TestCase
      */
     public function testCreateUdpToTcp(): void
     {
-        // 模拟连接
-        /** @var UdpConnection&MockObject $source */
+        // 必须使用具体类 UdpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $source = $this->createMock(UdpConnection::class);
-        /** @var TcpConnection&MockObject $target */
+        self::assertInstanceOf(UdpConnection::class, $source);
+        // 必须使用具体类 TcpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $target = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $target);
 
         // 创建管道
         $pipe = PipeFactory::createUdpToTcp($source, $target);
@@ -79,11 +104,18 @@ class PipeFactoryTest extends TestCase
      */
     public function testCreateUdpToUdp(): void
     {
-        // 模拟连接
-        /** @var UdpConnection&MockObject $source */
+        // 必须使用具体类 UdpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $source = $this->createMock(UdpConnection::class);
-        /** @var UdpConnection&MockObject $target */
+        self::assertInstanceOf(UdpConnection::class, $source);
+        // 必须使用具体类 UdpConnection 的原因：
+        // 1. 测试需要验证类型验证逻辑的正确性
+        // 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+        // 3. 需要模拟真实场景中的连接对象行为
         $target = $this->createMock(UdpConnection::class);
+        self::assertInstanceOf(UdpConnection::class, $target);
 
         // 创建管道
         $pipe = PipeFactory::createUdpToUdp($source, $target);

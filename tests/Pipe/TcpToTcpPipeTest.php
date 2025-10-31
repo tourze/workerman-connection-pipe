@@ -2,7 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -10,7 +10,11 @@ use Tourze\Workerman\ConnectionPipe\Pipe\TcpToTcpPipe;
 use Workerman\Connection\ConnectionInterface;
 use Workerman\Connection\TcpConnection;
 
-class TcpToTcpPipeTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(TcpToTcpPipe::class)]
+final class TcpToTcpPipeTest extends TestCase
 {
     private TcpToTcpPipe $pipe;
 
@@ -31,7 +35,12 @@ class TcpToTcpPipeTest extends TestCase
      */
     public function testSetSourceTypeCheck(): void
     {
-        // 模拟一个TCP连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置源连接（应该不会抛出异常）
@@ -47,8 +56,8 @@ class TcpToTcpPipeTest extends TestCase
     public function testSetSourceInvalidType(): void
     {
         // 使用通用连接接口而不是具体的TCP连接
-        /** @var ConnectionInterface&MockObject $nonTcpConnection */
         $nonTcpConnection = $this->createMock(ConnectionInterface::class);
+        self::assertInstanceOf(ConnectionInterface::class, $nonTcpConnection);
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
@@ -63,7 +72,12 @@ class TcpToTcpPipeTest extends TestCase
      */
     public function testSetTargetTypeCheck(): void
     {
-        // 模拟一个TCP连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $tcpConnection = $this->createMock(TcpConnection::class);
 
         // 设置目标连接（应该不会抛出异常）
@@ -79,8 +93,8 @@ class TcpToTcpPipeTest extends TestCase
     public function testSetTargetInvalidType(): void
     {
         // 使用通用连接接口而不是具体的TCP连接
-        /** @var ConnectionInterface&MockObject $nonTcpConnection */
         $nonTcpConnection = $this->createMock(ConnectionInterface::class);
+        self::assertInstanceOf(ConnectionInterface::class, $nonTcpConnection);
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
@@ -95,8 +109,19 @@ class TcpToTcpPipeTest extends TestCase
      */
     public function testSetupPipeCallbacks(): void
     {
-        // 创建源和目标TCP连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(TcpConnection::class);
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接
@@ -115,25 +140,35 @@ class TcpToTcpPipeTest extends TestCase
      */
     public function testForward(): void
     {
-        // 简化版测试，不使用method和expects
-        // 创建源和目标TCP连接
-        /** @var TcpConnection&MockObject $sourceConnection */
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $sourceConnection);
 
-        /** @var TcpConnection&MockObject $targetConnection */
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $targetConnection);
 
         // 设置目标连接的send方法直接返回true
         $targetConnection->method('send')->willReturn(true);
-        
+
         // 设置连接的地址方法
         $sourceConnection->method('getLocalAddress')->willReturn('127.0.0.1:8001');
         $sourceConnection->method('getLocalPort')->willReturn(8001);
         $targetConnection->method('getRemoteAddress')->willReturn('127.0.0.1:8002');
 
         // 创建事件分发器
-        /** @var EventDispatcherInterface&MockObject $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        self::assertInstanceOf(EventDispatcherInterface::class, $eventDispatcher);
 
         // 创建带有自定义事件分发器的管道
         $pipe = new TcpToTcpPipe($eventDispatcher);
@@ -157,8 +192,19 @@ class TcpToTcpPipeTest extends TestCase
      */
     public function testForwardInactive(): void
     {
-        // 创建源和目标TCP连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(TcpConnection::class);
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接但不激活管道

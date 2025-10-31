@@ -11,9 +11,9 @@ use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
 use Tourze\Workerman\ConnectionPipe\DTO\ForwardContext;
 use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
 use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
+use Tourze\Workerman\ConnectionPipe\Exception\InvalidConnectionTypeException;
 use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
 use Workerman\Connection\ConnectionInterface;
-use Tourze\Workerman\ConnectionPipe\Exception\InvalidConnectionTypeException;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
 
@@ -45,10 +45,12 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
 
     /**
      * 管道的协议信息
+     *
+     * @var array<string, string>
      */
     protected array $protocols = [
         'source' => '',
-        'target' => ''
+        'target' => '',
     ];
 
     protected EventDispatcherInterface $eventDispatcher;
@@ -61,8 +63,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     public function __construct(
         ?EventDispatcherInterface $eventDispatcher = null,
         ?LoggerInterface $logger = null,
-    )
-    {
+    ) {
         // 生成唯一ID
         $this->id = uniqid('pipe_', true);
 
@@ -147,6 +148,9 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
         return $this;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getProtocols(): array
     {
         return $this->protocols;
@@ -177,9 +181,10 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     /**
      * 转发数据的抽象方法，由具体子类实现
      *
-     * @param string $data 要转发的数据
+     * @param string $data          要转发的数据
      * @param string $sourceAddress 源地址(UDP)
-     * @param int $sourcePort 源端口(UDP)
+     * @param int    $sourcePort    源端口(UDP)
+     *
      * @return bool 成功返回true，失败返回false
      */
     abstract public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool;
@@ -201,9 +206,6 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     /**
      * 验证连接类型
      *
-     * @param ConnectionInterface $connection
-     * @param string $expectedType
-     * @param string $connectionName
      * @throws InvalidConnectionTypeException
      */
     protected function validateConnectionType(ConnectionInterface $connection, string $expectedType, string $connectionName): void
@@ -211,7 +213,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
         $actualType = $connection instanceof TcpConnection ? 'tcp' : 'udp';
 
         if ($actualType !== $expectedType) {
-            $expectedClass = $expectedType === 'tcp' ? TcpConnection::class : UdpConnection::class;
+            $expectedClass = 'tcp' === $expectedType ? TcpConnection::class : UdpConnection::class;
             throw InvalidConnectionTypeException::create($connectionName, $expectedClass);
         }
     }
@@ -223,9 +225,9 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     {
         // 设置源连接的 onMessage 回调
         $this->setupSourceOnMessage();
-        
+
         // 设置源连接的 onClose 回调
-        $this->source->onClose = function () {
+        $this->source->onClose = function (): void {
             $this->target->close();
         };
 
@@ -242,11 +244,11 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
     protected function setupSourceOnMessage(): void
     {
         if ($this->source instanceof UdpConnection) {
-            $this->source->onMessage = function ($conn, $data, $sourceAddress, $sourcePort) {
+            $this->source->onMessage = function ($conn, $data, $sourceAddress, $sourcePort): void {
                 $this->handleMessage($data, $sourceAddress, $sourcePort);
             };
         } else {
-            $this->source->onMessage = function ($conn, $data) {
+            $this->source->onMessage = function ($conn, $data): void {
                 $this->handleMessage($data);
             };
         }
@@ -257,8 +259,9 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
      */
     protected function handleMessage(string $data, string $sourceAddress = '', int $sourcePort = 0): void
     {
-        if (empty($this->messageWatcher)) {
+        if (null === $this->messageWatcher) {
             $this->forward($data, $sourceAddress, $sourcePort);
+
             return;
         }
 
@@ -266,7 +269,7 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
             $data,
             $this->source,
             $this->target,
-            function (bool $result) use ($data, $sourceAddress, $sourcePort) {
+            function (bool $result) use ($data, $sourceAddress, $sourcePort): void {
                 if ($result) {
                     $this->forward($data, $sourceAddress, $sourcePort);
                 }
@@ -279,18 +282,17 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
      */
     protected function setupTargetBufferCallbacks(): void
     {
-        $target = $this->target;
-        assert($target instanceof TcpConnection);;
+        assert($this->target instanceof TcpConnection);
 
         // 在目标连接上设置onBufferFull回调，暂停源连接接收数据
-        $target->onBufferFull = function () {
+        $this->target->onBufferFull = function (): void {
             if ($this->source instanceof TcpConnection) {
                 $this->source->pauseRecv();
             }
         };
 
         // 在目标连接上设置onBufferDrain回调，恢复源连接接收数据
-        $target->onBufferDrain = function () {
+        $this->target->onBufferDrain = function (): void {
             if ($this->source instanceof TcpConnection) {
                 $this->source->resumeRecv();
             }
@@ -316,17 +318,19 @@ abstract class AbstractConnectionPipe implements ConnectionPipeInterface
             // 发送数据
             $sendResult = $this->target->send($data);
 
-            if ($sendResult === false) {
+            if (false === $sendResult) {
                 $this->handleForwardFailure('发送失败', $data, $context);
+
                 return false;
             }
 
             // 分发成功事件
             $this->dispatchForwardedEvent($data, $context);
-            return true;
 
+            return true;
         } catch (\Throwable $e) {
             $this->handleForwardError($e, $data, $context);
+
             return false;
         }
     }

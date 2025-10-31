@@ -3,6 +3,9 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/container_helper.php';
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Tourze\Workerman\ConnectionPipe\Container;
 use Tourze\Workerman\ConnectionPipe\Event\DataForwardedEvent;
 use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
@@ -12,19 +15,19 @@ use Workerman\Timer;
 use Workerman\Worker;
 
 // 创建日志处理器
-$logger = new \Monolog\Logger('udp_to_tcp');
-$logger->pushHandler(new \Monolog\Handler\StreamHandler('php://stdout', \Monolog\Logger::DEBUG));
+$logger = new Logger('udp_to_tcp');
+$logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
 Container::getInstance()->setLogger($logger);
 
 // 创建事件分发器
-$eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-$eventDispatcher->addListener(DataForwardedEvent::class, function (DataForwardedEvent $event) {
+$eventDispatcher = new EventDispatcher();
+$eventDispatcher->addListener(DataForwardedEvent::class, function (DataForwardedEvent $event): void {
     $metadata = $event->getMetadata();
     echo "数据转发成功: {$event->getSourceProtocol()}->{$event->getTargetProtocol()} " .
-        "长度: " . strlen($event->getData()) .
-        (isset($metadata['direction']) ? " 方向: {$metadata['direction']}" : "") . PHP_EOL;
+        '长度: ' . strlen($event->getData()) .
+        (isset($metadata['direction']) ? " 方向: {$metadata['direction']}" : '') . PHP_EOL;
 });
-$eventDispatcher->addListener(ForwardFailedEvent::class, function (ForwardFailedEvent $event) {
+$eventDispatcher->addListener(ForwardFailedEvent::class, function (ForwardFailedEvent $event): void {
     echo "数据转发失败: {$event->getSourceProtocol()}->{$event->getTargetProtocol()} " .
         "原因: {$event->getReason()}" . PHP_EOL;
 });
@@ -40,12 +43,12 @@ $targetAddress = 'tcp://127.0.0.1:8001';
 // UDP服务器回话跟踪
 $connections = [];
 
-$udpServer->onWorkerStart = function ($worker) use (&$connections, $targetAddress) {
+$udpServer->onWorkerStart = function ($worker) use (&$connections): void {
     // 在启动时清空连接数组
     $connections = [];
 };
 
-$udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPort) use (&$connections, $targetAddress) {
+$udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPort) use (&$connections, $targetAddress): void {
     $clientKey = "{$clientAddress}:{$clientPort}";
     echo "收到UDP客户端消息: {$clientKey}\n";
 
@@ -56,7 +59,7 @@ $udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPor
         // 创建到目标TCP服务器的连接
         $targetConnection = new AsyncTcpConnection($targetAddress);
 
-        $targetConnection->onConnect = function ($targetConn) use ($connection, $clientAddress, $clientPort, &$connections, $clientKey) {
+        $targetConnection->onConnect = function ($targetConn) use ($connection, $clientAddress, $clientPort, &$connections, $clientKey): void {
             echo "已连接到目标TCP服务器: {$targetConn->id} 为UDP客户端: {$clientKey}\n";
 
             // 创建UDP到TCP的转发管道
@@ -68,12 +71,12 @@ $udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPor
                 'pipe' => $pipe,
                 'last_active' => time(),
                 'address' => $clientAddress,
-                'port' => $clientPort
+                'port' => $clientPort,
             ];
         };
 
-        $targetConnection->onMessage = function ($targetConn, $data) use ($connection, $clientAddress, $clientPort, $clientKey, &$connections) {
-            echo "从TCP服务器收到回复: " . substr($data, 0, 20) . (strlen($data) > 20 ? "..." : "") . " 发送到UDP客户端: {$clientKey}\n";
+        $targetConnection->onMessage = function ($targetConn, $data) use ($clientAddress, $clientPort, $clientKey, &$connections): void {
+            echo '从TCP服务器收到回复: ' . substr($data, 0, 20) . (strlen($data) > 20 ? '...' : '') . " 发送到UDP客户端: {$clientKey}\n";
 
             // 查找对应的UDP客户端地址
             if (isset($connections[$clientKey]) && $connections[$clientKey]['pipe']) {
@@ -85,7 +88,7 @@ $udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPor
             }
         };
 
-        $targetConnection->onClose = function ($targetConn) use ($clientKey, &$connections) {
+        $targetConnection->onClose = function ($targetConn) use ($clientKey, &$connections): void {
             echo "目标TCP连接已关闭: {$targetConn->id} 对应UDP客户端: {$clientKey}\n";
             if (isset($connections[$clientKey])) {
                 if (isset($connections[$clientKey]['pipe'])) {
@@ -95,8 +98,8 @@ $udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPor
             }
         };
 
-        $targetConnection->onError = function ($targetConn, $code, $msg) use ($clientKey, &$connections) {
-            echo "目标TCP连接错误: $code $msg 对应UDP客户端: {$clientKey}\n";
+        $targetConnection->onError = function ($targetConn, $code, $msg) use ($clientKey, &$connections): void {
+            echo "目标TCP连接错误: {$code} {$msg} 对应UDP客户端: {$clientKey}\n";
             if (isset($connections[$clientKey])) {
                 if (isset($connections[$clientKey]['pipe'])) {
                     $connections[$clientKey]['pipe']->close();
@@ -117,8 +120,8 @@ $udpServer->onMessage = function ($connection, $data, $clientAddress, $clientPor
 };
 
 // 定期清理不活跃的连接
-$udpServer->onWorkerStart = function ($worker) use (&$connections) {
-    Timer::add(60, function () use (&$connections) {
+$udpServer->onWorkerStart = function ($worker) use (&$connections): void {
+    Timer::add(60, function () use (&$connections): void {
         $now = time();
         $timeout = 300; // 5分钟超时
 
@@ -135,17 +138,17 @@ $udpServer->onWorkerStart = function ($worker) use (&$connections) {
             }
         }
 
-        echo "当前活跃UDP客户端数: " . count($connections) . "\n";
+        echo '当前活跃UDP客户端数: ' . count($connections) . "\n";
     });
 };
 
 // 创建目标TCP服务器（用于测试）
 $targetServer = new Worker('tcp://0.0.0.0:8001');
-$targetServer->onMessage = function ($connection, $data) {
-    echo "目标TCP服务器收到数据: " . substr($data, 0, 20) . (strlen($data) > 20 ? "..." : "") . PHP_EOL;
+$targetServer->onMessage = function ($connection, $data): void {
+    echo '目标TCP服务器收到数据: ' . substr($data, 0, 20) . (strlen($data) > 20 ? '...' : '') . PHP_EOL;
 
     // 回复客户端
-    $connection->send("TCP服务器已收到 " . strlen($data) . " 字节数据");
+    $connection->send('TCP服务器已收到 ' . strlen($data) . ' 字节数据');
 };
 
 // 运行所有Worker

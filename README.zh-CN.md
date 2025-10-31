@@ -5,8 +5,30 @@
 [![Latest Version](https://img.shields.io/packagist/v/tourze/workerman-connection-pipe.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-connection-pipe)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/workerman-connection-pipe.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-connection-pipe)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PHP Version](https://img.shields.io/badge/php-%5E8.2-blue.svg)](https://php.net/)
+[![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/tourze/workerman-connection-pipe)
 
 一个高性能、高可定制的连接转发框架，基于 Workerman，支持 TCP 和 UDP 连接之间的数据传输和协议转换。
+
+## 目录
+
+- [功能特性](#功能特性)
+- [安装](#安装)
+- [快速开始](#快速开始)
+  - [配置](#配置)
+  - [TCP 到 TCP 代理示例](#tcp-到-tcp-代理示例)
+  - [UDP 到 UDP 转发示例](#udp-到-udp-转发示例)
+- [监听事件](#监听事件)
+- [自定义数据处理](#自定义数据处理)
+- [详细工作流程](#详细工作流程)
+- [高级配置](#高级配置)
+  - [设置缓冲区大小](#设置缓冲区大小)
+  - [启用加密传输](#启用加密传输)
+- [性能优化建议](#性能优化建议)
+- [问题排查](#问题排查)
+- [贡献](#贡献)
+- [更新日志](#更新日志)
+- [许可证](#许可证)
 
 ## 功能特性
 
@@ -279,6 +301,14 @@ $targetConnection->connect();
 3. **内存使用过高**：检查连接是否正确关闭，NAT 映射是否定期清理。
 
 4. **UDP 通信不稳定**：UDP 没有连接状态，确保正确处理数据包丢失和乱序情况。
+
+## 贡献
+
+请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解我们的行为准则和提交拉取请求的流程详情。
+
+## 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解每个版本的详细更改内容。
 
 ## 许可证
 

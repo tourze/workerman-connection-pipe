@@ -33,8 +33,8 @@ class TcpToTcpPipe extends AbstractConnectionPipe
     public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool
     {
         $context = new ForwardContext(
-            sourceId: isset($this->source->id) ? (string)$this->source->id : null,
-            targetId: isset($this->target->id) ? (string)$this->target->id : null,
+            sourceId: isset($this->source->id) ? (string) $this->source->id : null,
+            targetId: isset($this->target->id) ? (string) $this->target->id : null,
             sourceAddress: $this->source->getLocalAddress(),
             sourcePort: $this->source->getLocalPort(),
             targetAddress: $this->target->getRemoteAddress(),

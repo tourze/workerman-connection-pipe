@@ -2,10 +2,15 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\DTO;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\ConnectionPipe\DTO\ForwardContext;
 
-class ForwardContextTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ForwardContext::class)]
+final class ForwardContextTest extends TestCase
 {
     /**
      * 测试构造函数和属性访问

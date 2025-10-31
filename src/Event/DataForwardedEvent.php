@@ -11,18 +11,18 @@ use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
 class DataForwardedEvent extends Event
 {
     /**
-     * @param ConnectionPipeInterface $pipe 连接管道实例
-     * @param string $data 转发的数据
-     * @param string $sourceProtocol 源协议
-     * @param string $targetProtocol 目标协议
-     * @param array $metadata 其他元数据信息
+     * @param ConnectionPipeInterface $pipe           连接管道实例
+     * @param string                  $data           转发的数据
+     * @param string                  $sourceProtocol 源协议
+     * @param string                  $targetProtocol 目标协议
+     * @param array<string, mixed>    $metadata       其他元数据信息
      */
     public function __construct(
         private readonly ConnectionPipeInterface $pipe,
         private readonly string $data,
         private readonly string $sourceProtocol,
         private readonly string $targetProtocol,
-        private readonly array $metadata = []
+        private readonly array $metadata = [],
     ) {
     }
 
@@ -60,6 +60,8 @@ class DataForwardedEvent extends Event
 
     /**
      * 获取元数据
+     *
+     * @return array<string, mixed>
      */
     public function getMetadata(): array
     {

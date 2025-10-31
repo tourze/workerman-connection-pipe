@@ -51,6 +51,7 @@ class Address implements \Stringable
         $address->setHost($host);
         $address->setPort($port);
         $address->setProtocol($protocol);
+
         return $address;
     }
 

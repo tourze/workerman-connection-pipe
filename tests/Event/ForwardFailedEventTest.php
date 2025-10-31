@@ -2,12 +2,16 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\Event;
 
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractEventTestCase;
 use Tourze\Workerman\ConnectionPipe\Contracts\ConnectionPipeInterface;
 use Tourze\Workerman\ConnectionPipe\Event\ForwardFailedEvent;
 
-class ForwardFailedEventTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ForwardFailedEvent::class)]
+final class ForwardFailedEventTest extends AbstractEventTestCase
 {
     /**
      * 测试事件构造和属性访问器
@@ -15,8 +19,8 @@ class ForwardFailedEventTest extends TestCase
     public function testEventConstruction(): void
     {
         // 模拟管道接口
-        /** @var ConnectionPipeInterface&MockObject $pipe */
         $pipe = $this->createMock(ConnectionPipeInterface::class);
+        self::assertInstanceOf(ConnectionPipeInterface::class, $pipe);
 
         // 测试数据
         $data = 'test data';
@@ -54,8 +58,8 @@ class ForwardFailedEventTest extends TestCase
     public function testDefaultMetadata(): void
     {
         // 模拟管道接口
-        /** @var ConnectionPipeInterface&MockObject $pipe */
         $pipe = $this->createMock(ConnectionPipeInterface::class);
+        self::assertInstanceOf(ConnectionPipeInterface::class, $pipe);
 
         // 创建不带元数据的事件对象
         $event = new ForwardFailedEvent(

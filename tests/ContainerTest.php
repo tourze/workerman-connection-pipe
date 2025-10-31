@@ -2,16 +2,23 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests;
 
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Tourze\Workerman\ConnectionPipe\Container;
 
-class ContainerTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(Container::class)]
+final class ContainerTest extends TestCase
 {
-    protected function tearDown(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+
+        // 在每个测试前重置容器状态
         Container::getInstance()->setLogger(null);
         Container::getInstance()->setEventDispatcher(null);
     }
@@ -19,8 +26,8 @@ class ContainerTest extends TestCase
     public function testSetGetLogger(): void
     {
         // 创建一个模拟的Logger对象
-        /** @var LoggerInterface&MockObject $logger */
         $logger = $this->createMock(LoggerInterface::class);
+        self::assertInstanceOf(LoggerInterface::class, $logger);
 
         // 设置Logger
         Container::getInstance()->setLogger($logger);
@@ -32,8 +39,8 @@ class ContainerTest extends TestCase
     public function testSetGetEventDispatcher(): void
     {
         // 创建一个模拟的EventDispatcher对象
-        /** @var EventDispatcherInterface&MockObject $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        self::assertInstanceOf(EventDispatcherInterface::class, $eventDispatcher);
 
         // 设置EventDispatcher
         Container::getInstance()->setEventDispatcher($eventDispatcher);

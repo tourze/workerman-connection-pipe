@@ -2,7 +2,7 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -10,16 +10,37 @@ use Tourze\Workerman\ConnectionPipe\Pipe\UdpToUdpPipe;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
 
-class UdpToUdpPipeTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(UdpToUdpPipe::class)]
+final class UdpToUdpPipeTest extends TestCase
 {
     private UdpToUdpPipe $pipe;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 创建事件分发器和日志记录器模拟对象
+        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        $logger = $this->createMock(LoggerInterface::class);
+
+        // 创建管道实例
+        $this->pipe = new UdpToUdpPipe($eventDispatcher, $logger);
+    }
 
     /**
      * 测试设置源连接的类型检查
      */
     public function testSetSourceTypeCheck(): void
     {
-        // 模拟一个UDP连接
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 设置源连接（应该不会抛出异常）
@@ -34,9 +55,14 @@ class UdpToUdpPipeTest extends TestCase
      */
     public function testSetSourceInvalidType(): void
     {
-        // 使用TCP连接而不是UDP连接
-        /** @var TcpConnection&MockObject $tcpConnection */
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $tcpConnection = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $tcpConnection);
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
@@ -51,7 +77,12 @@ class UdpToUdpPipeTest extends TestCase
      */
     public function testSetTargetTypeCheck(): void
     {
-        // 模拟一个UDP连接
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 设置目标连接（应该不会抛出异常）
@@ -66,9 +97,14 @@ class UdpToUdpPipeTest extends TestCase
      */
     public function testSetTargetInvalidType(): void
     {
-        // 使用TCP连接而不是UDP连接
-        /** @var TcpConnection&MockObject $tcpConnection */
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $tcpConnection = $this->createMock(TcpConnection::class);
+        self::assertInstanceOf(TcpConnection::class, $tcpConnection);
 
         // 期望抛出异常
         $this->expectException(\InvalidArgumentException::class);
@@ -83,12 +119,23 @@ class UdpToUdpPipeTest extends TestCase
      */
     public function testForward(): void
     {
-        // 创建源和目标UDP连接
-        /** @var UdpConnection&MockObject $sourceConnection */
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(UdpConnection::class);
+        self::assertInstanceOf(UdpConnection::class, $sourceConnection);
 
-        /** @var UdpConnection&MockObject $targetConnection */
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(UdpConnection::class);
+        self::assertInstanceOf(UdpConnection::class, $targetConnection);
 
         // 设置源连接的方法
         $sourceConnection->method('getLocalAddress')->willReturn('127.0.0.1:9001');
@@ -100,8 +147,8 @@ class UdpToUdpPipeTest extends TestCase
         $targetConnection->method('getRemotePort')->willReturn(9003);
 
         // 创建事件分发器
-        /** @var EventDispatcherInterface&MockObject $eventDispatcher */
         $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
+        self::assertInstanceOf(EventDispatcherInterface::class, $eventDispatcher);
 
         // 创建带有自定义事件分发器的管道
         $pipe = new UdpToUdpPipe($eventDispatcher);
@@ -125,8 +172,19 @@ class UdpToUdpPipeTest extends TestCase
      */
     public function testForwardInactive(): void
     {
-        // 创建源和目标连接
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(UdpConnection::class);
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 管道需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(UdpConnection::class);
 
         // 设置连接但不激活管道
@@ -138,17 +196,5 @@ class UdpToUdpPipeTest extends TestCase
 
         // 验证转发失败
         $this->assertFalse($result);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // 创建事件分发器和日志记录器模拟对象
-        $eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $logger = $this->createMock(LoggerInterface::class);
-
-        // 创建管道实例
-        $this->pipe = new UdpToUdpPipe($eventDispatcher, $logger);
     }
 }

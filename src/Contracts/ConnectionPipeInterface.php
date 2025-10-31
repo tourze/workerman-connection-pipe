@@ -58,9 +58,10 @@ interface ConnectionPipeInterface
      * 转发数据
      * 从源连接到目标连接转发特定数据
      *
-     * @param string $data 要转发的数据
+     * @param string $data          要转发的数据
      * @param string $sourceAddress 源地址(UDP)
-     * @param int $sourcePort 源端口(UDP)
+     * @param int    $sourcePort    源端口(UDP)
+     *
      * @return bool 成功返回true，失败返回false
      */
     public function forward(string $data, string $sourceAddress = '', int $sourcePort = 0): bool;
@@ -68,7 +69,7 @@ interface ConnectionPipeInterface
     /**
      * 获取管道的协议信息
      *
-     * @return array 包含源协议和目标协议的数组，例如 ['source' => 'tcp', 'target' => 'udp']
+     * @return array<string, string> 包含源协议和目标协议的数组，例如 ['source' => 'tcp', 'target' => 'udp']
      */
     public function getProtocols(): array;
 

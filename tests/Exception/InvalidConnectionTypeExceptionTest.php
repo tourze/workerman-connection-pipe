@@ -1,22 +1,24 @@
 <?php
 
-namespace Tourze\Workerman\ConnectionPipe\Tests\Unit\Exception;
+namespace Tourze\Workerman\ConnectionPipe\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 use Tourze\Workerman\ConnectionPipe\Exception\InvalidConnectionTypeException;
 
 /**
- * @covers \Tourze\Workerman\ConnectionPipe\Exception\InvalidConnectionTypeException
+ * @internal
  */
-class InvalidConnectionTypeExceptionTest extends TestCase
+#[CoversClass(InvalidConnectionTypeException::class)]
+final class InvalidConnectionTypeExceptionTest extends AbstractExceptionTestCase
 {
     public function testCreate(): void
     {
         $connectionName = 'Source';
         $expectedClass = 'TcpConnection';
-        
+
         $exception = InvalidConnectionTypeException::create($connectionName, $expectedClass);
-        
+
         $this->assertInstanceOf(InvalidConnectionTypeException::class, $exception);
         $this->assertInstanceOf(\InvalidArgumentException::class, $exception);
         $this->assertSame(
@@ -29,7 +31,7 @@ class InvalidConnectionTypeExceptionTest extends TestCase
     {
         $this->expectException(InvalidConnectionTypeException::class);
         $this->expectExceptionMessage('Test connection must be an instance of TestClass');
-        
+
         throw InvalidConnectionTypeException::create('Test', 'TestClass');
     }
 }

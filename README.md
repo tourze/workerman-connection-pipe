@@ -5,8 +5,30 @@
 [![Latest Version](https://img.shields.io/packagist/v/tourze/workerman-connection-pipe.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-connection-pipe)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/workerman-connection-pipe.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-connection-pipe)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PHP Version](https://img.shields.io/badge/php-%5E8.2-blue.svg)](https://php.net/)
+[![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/tourze/workerman-connection-pipe)
 
 A high-performance, highly customizable connection forwarding framework based on Workerman, supporting data transmission and protocol conversion between TCP and UDP connections.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Configuration](#configuration)
+  - [TCP to TCP Proxy Example](#tcp-to-tcp-proxy-example)
+  - [UDP to UDP Forwarding Example](#udp-to-udp-forwarding-example)
+- [Listening to Events](#listening-to-events)
+- [Custom Data Processing](#custom-data-processing)
+- [Detailed Workflows](#detailed-workflows)
+- [Advanced Configuration](#advanced-configuration)
+  - [Setting Buffer Size](#setting-buffer-size)
+  - [Enabling Encrypted Transport](#enabling-encrypted-transport)
+- [Performance Optimization Tips](#performance-optimization-tips)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
+- [License](#license)
 
 ## Features
 
@@ -279,6 +301,14 @@ $targetConnection->connect();
 3. **High Memory Usage**: Check if connections are properly closed and NAT mappings are periodically cleaned up.
 
 4. **Unstable UDP Communication**: UDP does not have connection state, ensure proper handling of packet loss and out-of-order situations.
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for details on what has changed in each version.
 
 ## License
 

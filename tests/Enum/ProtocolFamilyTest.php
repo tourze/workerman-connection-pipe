@@ -2,10 +2,15 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\Enum;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitEnum\AbstractEnumTestCase;
 use Tourze\Workerman\ConnectionPipe\Enum\ProtocolFamily;
 
-class ProtocolFamilyTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ProtocolFamily::class)]
+final class ProtocolFamilyTest extends AbstractEnumTestCase
 {
     public function testEnumValues(): void
     {
@@ -37,5 +42,23 @@ class ProtocolFamilyTest extends TestCase
         $this->assertSame(ProtocolFamily::TCP, ProtocolFamily::tryFrom('tcp'));
         $this->assertSame(ProtocolFamily::UDP, ProtocolFamily::tryFrom('udp'));
         $this->assertNull(ProtocolFamily::tryFrom('invalid_protocol'));
+    }
+
+    public function testToArray(): void
+    {
+        // 测试toArray方法返回包含value和label的数组
+        $tcpArray = ProtocolFamily::TCP->toArray();
+        $this->assertIsArray($tcpArray);
+        $this->assertArrayHasKey('value', $tcpArray);
+        $this->assertArrayHasKey('label', $tcpArray);
+        $this->assertSame('tcp', $tcpArray['value']);
+        $this->assertSame('TCP', $tcpArray['label']);
+
+        $udpArray = ProtocolFamily::UDP->toArray();
+        $this->assertIsArray($udpArray);
+        $this->assertArrayHasKey('value', $udpArray);
+        $this->assertArrayHasKey('label', $udpArray);
+        $this->assertSame('udp', $udpArray['value']);
+        $this->assertSame('UDP', $udpArray['label']);
     }
 }

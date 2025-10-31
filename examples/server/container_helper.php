@@ -5,7 +5,7 @@ namespace Tourze\Workerman\ConnectionPipe;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
+/*
  * 如果项目中的Container类没有静态方法setLogger和setEventDispatcher，
  * 这个文件提供了临时解决方案
  */

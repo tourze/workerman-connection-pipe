@@ -1,21 +1,23 @@
 <?php
 
-namespace Tourze\Workerman\ConnectionPipe\Tests\Unit\Model;
+namespace Tourze\Workerman\ConnectionPipe\Tests\Model;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\ConnectionPipe\Enum\ProtocolFamily;
 use Tourze\Workerman\ConnectionPipe\Model\Address;
 
 /**
- * @covers \Tourze\Workerman\ConnectionPipe\Model\Address
+ * @internal
  */
-class AddressTest extends TestCase
+#[CoversClass(Address::class)]
+final class AddressTest extends TestCase
 {
     public function testGetSetProtocol(): void
     {
         $address = new Address();
         $protocol = ProtocolFamily::TCP;
-        
+
         $address->setProtocol($protocol);
         $this->assertSame($protocol, $address->getProtocol());
     }
@@ -24,7 +26,7 @@ class AddressTest extends TestCase
     {
         $address = new Address();
         $host = '192.168.1.1';
-        
+
         $address->setHost($host);
         $this->assertSame($host, $address->getHost());
     }
@@ -33,7 +35,7 @@ class AddressTest extends TestCase
     {
         $address = new Address();
         $port = 8080;
-        
+
         $address->setPort($port);
         $this->assertSame($port, $address->getPort());
     }
@@ -43,9 +45,9 @@ class AddressTest extends TestCase
         $host = '192.168.1.1';
         $port = 8080;
         $protocol = ProtocolFamily::TCP;
-        
+
         $address = Address::create($host, $port, $protocol);
-        
+
         $this->assertInstanceOf(Address::class, $address);
         $this->assertSame($host, $address->getHost());
         $this->assertSame($port, $address->getPort());
@@ -56,11 +58,11 @@ class AddressTest extends TestCase
     {
         $host = '192.168.1.1';
         $port = 8080;
-        
+
         $address = new Address();
         $address->setHost($host);
         $address->setPort($port);
-        
+
         $this->assertSame('192.168.1.1:8080', (string) $address);
     }
 

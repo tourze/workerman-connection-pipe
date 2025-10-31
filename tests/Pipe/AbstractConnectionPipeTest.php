@@ -2,6 +2,8 @@
 
 namespace Tourze\Workerman\ConnectionPipe\Tests\Pipe;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -10,16 +12,19 @@ use Tourze\Workerman\ConnectionPipe\Watcher\MessageWatcherInterface;
 use Workerman\Connection\TcpConnection;
 use Workerman\Connection\UdpConnection;
 
-class AbstractConnectionPipeTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(AbstractConnectionPipe::class)]
+final class AbstractConnectionPipeTest extends TestCase
 {
     /**
      * 抽象管道的具体实现（用于测试）
      */
     private function createConcreteConnectionPipe(
         ?EventDispatcherInterface $eventDispatcher = null,
-        ?LoggerInterface          $logger = null
-    ): AbstractConnectionPipe
-    {
+        ?LoggerInterface $logger = null,
+    ): AbstractConnectionPipe {
         return new class($eventDispatcher, $logger) extends AbstractConnectionPipe {
             protected function setupPipeCallbacks(): void
             {
@@ -66,7 +71,19 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建模拟 TCP 连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. AbstractConnectionPipe 需要验证连接的具体类型，而不是接口
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 测试需要模拟真实的 Workerman 连接对象行为
+         */
         $sourceConnection = $this->createMock(TcpConnection::class);
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. AbstractConnectionPipe 需要验证连接的具体类型，而不是接口
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 测试需要模拟真实的 Workerman 连接对象行为
+         */
         $targetConnection = $this->createMock(TcpConnection::class);
 
         // 设置连接
@@ -86,6 +103,12 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建 UDP 连接（期望是 TCP）
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. 类型检查是基于具体类的 instanceof 判断，不是接口
+         * 3. 需要模拟真实场景中错误类型的连接对象
+         */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 期望抛出异常
@@ -103,6 +126,12 @@ class AbstractConnectionPipeTest extends TestCase
         $pipe = $this->createConcreteConnectionPipe();
 
         // 创建 UDP 连接（期望是 TCP）
+        /*
+         * 必须使用具体类 UdpConnection 的原因：
+         * 1. 测试需要验证类型验证逻辑的正确性
+         * 2. 类型检查是基于具体类的 instanceof 判断，不是接口
+         * 3. 需要模拟真实场景中错误类型的连接对象
+         */
         $udpConnection = $this->createMock(UdpConnection::class);
 
         // 期望抛出异常
@@ -123,7 +152,19 @@ class AbstractConnectionPipeTest extends TestCase
         $this->assertFalse($pipe->isActive());
 
         // 设置源和目标连接
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试管道状态管理需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $sourceConnection = $this->createMock(TcpConnection::class);
+        /*
+         * 必须使用具体类 TcpConnection 的原因：
+         * 1. 测试管道状态管理需要真实的连接对象
+         * 2. Workerman 的连接类型检查是基于具体类的 instanceof 判断
+         * 3. 需要模拟真实场景中的连接对象行为
+         */
         $targetConnection = $this->createMock(TcpConnection::class);
         $pipe->setSource($sourceConnection);
         $pipe->setTarget($targetConnection);
@@ -144,18 +185,38 @@ class AbstractConnectionPipeTest extends TestCase
     {
         $pipe = $this->createConcreteConnectionPipe();
 
-        // 创建消息观察器
+        // 设置源和目标连接
+        $sourceConnection = $this->createMock(TcpConnection::class);
+        $targetConnection = $this->createMock(TcpConnection::class);
+        $pipe->setSource($sourceConnection);
+        $pipe->setTarget($targetConnection);
+
+        // 创建消息观察器，验证其会被正确调用
         $watcher = $this->createMock(MessageWatcherInterface::class);
+        $watcher->expects($this->once())
+            ->method('__invoke')
+            ->with(
+                $this->equalTo('test message'),
+                self::identicalTo($sourceConnection),
+                self::identicalTo($targetConnection),
+                self::isCallable()
+            )
+        ;
 
         // 设置观察器
         $pipe->setMessageWatcher($watcher);
 
-        // 清除观察器
+        // 触发消息处理以验证观察器被调用
+        $reflection = new \ReflectionClass($pipe);
+        $handleMessageMethod = $reflection->getMethod('handleMessage');
+        $handleMessageMethod->setAccessible(true);
+        $handleMessageMethod->invoke($pipe, 'test message');
+
+        // 测试清除观察器后不再调用
         $pipe->unsetMessageWatcher();
 
-        // 这里我们无法直接测试观察器是否已设置或清除，因为它是一个protected属性
-        // 但至少可以确保上述方法调用不会抛出异常
-        $this->assertTrue(true);
+        // 再次触发消息，观察器不应被调用（above expects(once) 已满足）
+        $handleMessageMethod->invoke($pipe, 'another message');
     }
 
     /**

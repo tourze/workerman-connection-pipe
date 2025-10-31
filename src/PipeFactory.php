@@ -23,6 +23,7 @@ class PipeFactory
         $pipe = new TcpToTcpPipe();
         $pipe->setSource($source);
         $pipe->setTarget($target);
+
         return $pipe;
     }
 
@@ -34,6 +35,7 @@ class PipeFactory
         $pipe = new TcpToUdpPipe();
         $pipe->setSource($source);
         $pipe->setTarget($target);
+
         return $pipe;
     }
 
@@ -45,6 +47,7 @@ class PipeFactory
         $pipe = new UdpToTcpPipe();
         $pipe->setSource($source);
         $pipe->setTarget($target);
+
         return $pipe;
     }
 
@@ -56,6 +59,7 @@ class PipeFactory
         $pipe = new UdpToUdpPipe();
         $pipe->setSource($source);
         $pipe->setTarget($target);
+
         return $pipe;
     }
 }

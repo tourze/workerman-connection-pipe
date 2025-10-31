@@ -9,16 +9,21 @@ use Workerman\Connection\ConnectionInterface;
 class Container
 {
     private static ?self $instance = null;
+
     private ?LoggerInterface $logger = null;
+
     private ?EventDispatcherInterface $eventDispatcher = null;
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
+        if (null === self::$instance) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
